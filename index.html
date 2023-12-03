@@ -45,37 +45,49 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-    document.getElementById('submitTeams').addEventListener('click', function(e) {
+document.getElementById('submitTeams').addEventListener('click', function(e) {
   e.preventDefault();
 
-  let dataToUpdate = {
-    values: [
-      [document.getElementById('player1-team1').value],
-      [document.getElementById('player2-team1').value],
-      // ... добавьте все поля формы
-    ]
-  };
+  let dataToUpdate = [
+    [document.getElementById('player1-team1').value],
+    [document.getElementById('player2-team1').value],
+    [document.getElementById('player3-team1').value],
+    [document.getElementById('player4-team1').value],
+    [document.getElementById('player5-team1').value],
+    [document.getElementById('player1-team2').value],
+    [document.getElementById('player2-team2').value],
+    [document.getElementById('player3-team2').value],
+    [document.getElementById('player4-team2').value],
+    [document.getElementById('player5-team2').value]
+  ];
 
-  fetch('https://sheets.googleapis.com/v4/spreadsheets/1ers9YDDr_Tu-P4yYhzffMjP1n7ORL4PLbCWFwpgmOVU/values/A1:A10?key=AIzaSyCPLlzeJdbFetIf81f0Tw5W9YnyQxIeZY4', {
+  fetch('https://sheets.googleapis.com/v4/spreadsheets/1ers9YDDr_Tu-P4yYhzffMjP1n7ORL4PLbCWFwpgmOVU/values/A1:A10?valueInputOption=USER_ENTERED', {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
+      'Authorization': 'Bearer [YOUR_ACCESS_TOKEN]'
     },
     body: JSON.stringify({
       range: 'A1:A10',
       majorDimension: 'ROWS',
-      values: dataToUpdate.values
+      values: dataToUpdate
     })
   })
-  .then(response => response.json())
-  .then(data => console.log(data))
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.json();
+  })
+  .then(data => {
+    alert('Данные успешно обновлены');
+    console.log(data);
+  })
   .catch(error => {
     console.error('Error:', error);
-    alert('Ошибка обновления данных');
+    alert('Ошибка обновления данных: ' + error.message);
   });
 });
-    
 </script>
-    
 </body>
 </html>
