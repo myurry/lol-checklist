@@ -39,7 +39,10 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById(`player${index + 1}-team2`).value = player[0];
       });
     })
-    .catch(error => console.error('Error:', error));
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Нет доступа к таблице');
+    });
 });
     
 </script>
