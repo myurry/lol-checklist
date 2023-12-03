@@ -23,5 +23,26 @@
         <input type="text" id="player5-team2" placeholder="Игрок 5">
     </div>
     <button id="submitTeams">Отправить</button>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  fetch('https://sheets.googleapis.com/v4/spreadsheets/1ers9YDDr_Tu-P4yYhzffMjP1n7ORL4PLbCWFwpgmOVU/values/A1:A10?key=AIzaSyCPLlzeJdbFetIf81f0Tw5W9YnyQxIeZY4')
+    .then(response => response.json())
+    .then(data => {
+      const team1 = data.values.slice(0, 5);
+      const team2 = data.values.slice(5, 10);
+
+      team1.forEach((player, index) => {
+        document.getElementById(`player${index + 1}-team1`).value = player[0];
+      });
+
+      team2.forEach((player, index) => {
+        document.getElementById(`player${index + 1}-team2`).value = player[0];
+      });
+    })
+    .catch(error => console.error('Error:', error));
+});
+    
+</script>
+    
 </body>
 </html>
