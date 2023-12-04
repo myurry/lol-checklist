@@ -3,91 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <title>Битва Команд в League of Legends</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-database.js"></script>
+    <script>
+        // Конфигурация Firebase
+        var firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            databaseURL: "YOUR_DATABASE_URL",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        // Инициализация Firebase
+        firebase.initializeApp(firebaseConfig);
+    </script>
 </head>
 <body>
     <h1>Регистрация Команд для League of Legends</h1>
     <div>
         <h2>Команда 1</h2>
-        <input type="text" id="player1-team1" placeholder="Игрок 1">
-        <input type="text" id="player2-team1" placeholder="Игрок 2">
-        <input type="text" id="player3-team1" placeholder="Игрок 3">
-        <input type="text" id="player4-team1" placeholder="Игрок 4">
-        <input type="text" id="player5-team1" placeholder="Игрок 5">
+        <!-- Инпуты для игроков -->
     </div>
     <div>
         <h2>Команда 2</h2>
-        <input type="text" id="player1-team2" placeholder="Игрок 1">
-        <input type="text" id="player2-team2" placeholder="Игрок 2">
-        <input type="text" id="player3-team2" placeholder="Игрок 3">
-        <input type="text" id="player4-team2" placeholder="Игрок 4">
-        <input type="text" id="player5-team2" placeholder="Игрок 5">
+        <!-- Инпуты для игроков -->
     </div>
     <button id="submitTeams">Отправить</button>
+
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  fetch('https://sheets.googleapis.com/v4/spreadsheets/1ers9YDDr_Tu-P4yYhzffMjP1n7ORL4PLbCWFwpgmOVU/values/A1:A10?key=AIzaSyCPLlzeJdbFetIf81f0Tw5W9YnyQxIeZY4')
-    .then(response => response.json())
-    .then(data => {
-      const team1 = data.values.slice(0, 5);
-      const team2 = data.values.slice(5, 10);
+var playersRef = firebase.database().ref('participant-table/player');
 
-      team1.forEach((player, index) => {
-        document.getElementById(`player${index + 1}-team1`).value = player[0];
-      });
-
-      team2.forEach((player, index) => {
-        document.getElementById(`player${index + 1}-team2`).value = player[0];
-      });
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert('Нет доступа к таблице');
+// Чтение данных при загрузке страницы
+playersRef.once('value', function(snapshot) {
+    snapshot.forEach(function(childSnapshot) {
+        var childData = childSnapshot.val();
+        if (childData.position < 6) {
+            document.getElementById(`player${childData.position}-team1`).value = childData.name;
+        } else {
+            document.getElementById(`player${childData.position - 5}-team2`).value = childData.name;
+        }
     });
 });
 
+// Запись данных при нажатии на кнопку
 document.getElementById('submitTeams').addEventListener('click', function(e) {
-  e.preventDefault();
-
-  let dataToUpdate = [
-    [document.getElementById('player1-team1').value],
-    [document.getElementById('player2-team1').value],
-    [document.getElementById('player3-team1').value],
-    [document.getElementById('player4-team1').value],
-    [document.getElementById('player5-team1').value],
-    [document.getElementById('player1-team2').value],
-    [document.getElementById('player2-team2').value],
-    [document.getElementById('player3-team2').value],
-    [document.getElementById('player4-team2').value],
-    [document.getElementById('player5-team2').value]
-  ];
-
-  fetch('https://sheets.googleapis.com/v4/spreadsheets/1ers9YDDr_Tu-P4yYhzffMjP1n7ORL4PLbCWFwpgmOVU/values/A1:A10?valueInputOption=USER_ENTERED', {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer [YOUR_ACCESS_TOKEN]'
-    },
-    body: JSON.stringify({
-      range: 'A1:A10',
-      majorDimension: 'ROWS',
-      values: dataToUpdate
-    })
-  })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
+    e.preventDefault();
+    for (let i = 1; i <= 5; i++) {
+        playersRef.push({
+            name: document.getElementById(`player${i}-team1`).value,
+            position: i
+        });
+        playersRef.push({
+            name: document.getElementById(`player${i}-team2`).value,
+            position: i + 5
+        });
     }
-    return response.json();
-  })
-  .then(data => {
-    alert('Данные успешно обновлены');
-    console.log(data);
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    alert('Ошибка обновления данных: ' + error.message);
-  });
+    alert('Данные обновлены');
 });
 </script>
+    
 </body>
 </html>
