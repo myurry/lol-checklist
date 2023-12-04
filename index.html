@@ -3,19 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <title>Битва Команд в League of Legends</title>
-    <!-- Обновленный Firebase SDK -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"></script>
     <script>
         // Конфигурация Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyBxBRcFUjf0ijLWE8RS_Q0n-uND3bsvGew",
-            authDomain: "lol-checklist-c069b.firebaseapp.com",
-            projectId: "lol-checklist-c069b",
-            storageBucket: "lol-checklist-c069b.appspot.com",
-            messagingSenderId: "957462002192",
-            appId: "1:957462002192:web:7a5f0f7eae9389a9b16895"
-        };
+       const firebaseConfig = {
+
+    apiKey: "AIzaSyBxBRcFUjf0ijLWE8RS_Q0n-uND3bsvGew",
+
+    authDomain: "lol-checklist-c069b.firebaseapp.com",
+
+    projectId: "lol-checklist-c069b",
+
+    storageBucket: "lol-checklist-c069b.appspot.com",
+
+    messagingSenderId: "957462002192",
+
+    appId: "1:957462002192:web:7a5f0f7eae9389a9b16895"
+
+  };
+
         // Инициализация Firebase
         firebase.initializeApp(firebaseConfig);
     </script>
@@ -32,40 +40,36 @@
     </div>
     <div>
         <h2>Команда 2</h2>
-        <input type="text" id="player1-team2" placeholder="Игрок 1">
-        <input type="text" id="player2-team2" placeholder="Игрок 2">
-        <input type="text" id="player3-team2" placeholder="Игрок 3">
-        <input type="text" id="player4-team2" placeholder="Игрок 4">
-        <input type="text" id="player5-team2" placeholder="Игрок 5">
+        <input type="text" id="player6-team2" placeholder="Игрок 6">
+        <input type="text" id="player7-team2" placeholder="Игрок 7">
+        <input type="text" id="player8-team2" placeholder="Игрок 8">
+        <input type="text" id="player9-team2" placeholder="Игрок 9">
+        <input type="text" id="player10-team2" placeholder="Игрок 10">
     </div>
     <button id="submitTeams">Отправить</button>
 
 <script>
-var playersRef = firebase.database().ref('participant-table/player');
+var playersRef = firebase.database().ref('participant-table');
 
 // Чтение данных при загрузке страницы
 playersRef.once('value', function(snapshot) {
     snapshot.forEach(function(childSnapshot) {
-        var childData = childSnapshot.val();
-        if (childData.position < 6) {
-            document.getElementById(`player${childData.position}-team1`).value = childData.name;
-        } else {
-            document.getElementById(`player${childData.position - 5}-team2`).value = childData.name;
-        }
+        var childKey = childSnapshot.key; // 'player1', 'player2', etc.
+        var childData = childSnapshot.val(); // 'Имя игрока'
+        var playerNumber = childKey.match(/\d+/)[0]; // извлекаем номер из 'player1', 'player2', etc.
+        var teamNumber = playerNumber <= 5 ? 'team1' : 'team2';
+        document.getElementById(`player${playerNumber}-${teamNumber}`).value = childData;
     });
 });
 
 // Запись данных при нажатии на кнопку
 document.getElementById('submitTeams').addEventListener('click', function(e) {
     e.preventDefault();
-    for (let i = 1; i <= 5; i++) {
-        playersRef.push({
-            name: document.getElementById(`player${i}-team1`).value,
-            position: i
-        });
-        playersRef.push({
-            name: document.getElementById(`player${i}-team2`).value,
-            position: i + 5
+    for (let i = 1; i <= 10; i++) {
+        var playerRef = playersRef.child('player' + i);
+        var teamNumber = i <= 5 ? 'team1' : 'team2';
+        playerRef.set(document.getElementById(`player${i}-${teamNumber}`).value).catch(function(error) {
+            alert("Ошибка записи данных для игрока: " + error.message);
         });
     }
     alert('Данные обновлены');
