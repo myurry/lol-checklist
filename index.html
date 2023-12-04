@@ -7,7 +7,7 @@
     <script type="module">
 
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, getDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
         // Конфигурация Firebasea
        const firebaseConfig = {
 
@@ -30,14 +30,44 @@
 
         const myCollection = collection(db, 'participant-table');
 
-    // Get documents from the collection
-    getDocs(myCollection).then(snapshot => {
-    snapshot.docs.forEach(doc => {
-        console.log(doc.data()); // Log the document data to the console
-    });
-    }).catch(error => {
-    console.error("Error getting documents: ", error);
-    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+    // Reading data from Firestore
+        getDoc(doc(db, "participant-table", "participant-table")).then(docSnap => {
+        if (docSnap.exists()) {
+            console.log(docSnap);
+            const data = docSnap.data();
+            for (let i = 1; i <= 10; i++) {
+            const playerField = `player${i}`;
+            if (data[playerField]) {
+                document.getElementById(`player${i}-team${i <= 5 ? '1' : '2'}`).value = data[playerField];
+            }
+            }
+        } else {
+            console.log("No such document!");
+        }
+        }).catch(error => {
+        console.error("Error getting document:", error);
+        });
+
+        // Writing data to Firestore
+        document.getElementById('submitTeams').addEventListener('click', function(e) {
+        e.preventDefault();
+        const playerData = {};
+        for (let i = 1; i <= 10; i++) {
+            playerData[`player${i}`] = document.getElementById(`player${i}-team${i <= 5 ? '1' : '2'}`).value;
+        }
+
+        setDoc(doc(db, "participant-table", "participant-table"), playerData)
+            .then(() => {
+            alert('Данные успешно обновлены');
+            location.reload();
+            })
+            .catch(error => {
+            alert("Ошибка записи данных: " + error.message);
+            });
+        });
+});
     </script>
 </head>
 <body>
@@ -52,43 +82,13 @@
     </div>
     <div>
         <h2>Команда 2</h2>
-        <input type="text" id="player6-team2" placeholder="Игрок 6">
-        <input type="text" id="player7-team2" placeholder="Игрок 7">
-        <input type="text" id="player8-team2" placeholder="Игрок 8">
-        <input type="text" id="player9-team2" placeholder="Игрок 9">
-        <input type="text" id="player10-team2" placeholder="Игрок 10">
+        <input type="text" id="player6-team2" placeholder="Игрок 1">
+        <input type="text" id="player7-team2" placeholder="Игрок 2">
+        <input type="text" id="player8-team2" placeholder="Игрок 3">
+        <input type="text" id="player9-team2" placeholder="Игрок 4">
+        <input type="text" id="player10-team2" placeholder="Игрок 5">
     </div>
     <button id="submitTeams">Отправить</button>
 
-<script>
-    document.addEventListener("DOMContentLoaded", ()=>{
-        var playersRef = firebase.database().ref('participant-table');
-
-        // Чтение данных при загрузке страницы
-        playersRef.once('value', function(snapshot) {
-            snapshot.forEach(function(childSnapshot) {
-                var childKey = childSnapshot.key; // 'player1', 'player2', etc.
-                var childData = childSnapshot.val(); // 'Имя игрока'
-                var playerNumber = childKey.match(/\d+/)[0]; // извлекаем номер из 'player1', 'player2', etc.
-                var teamNumber = playerNumber <= 5 ? 'team1' : 'team2';
-                document.getElementById(`player${playerNumber}-${teamNumber}`).value = childData;
-            });
-        });
-
-        // Запись данных при нажатии на кнопку
-        document.getElementById('submitTeams').addEventListener('click', function(e) {
-            e.preventDefault();
-            for (let i = 1; i <= 10; i++) {
-                var playerRef = playersRef.child('player' + i);
-                var teamNumber = i <= 5 ? 'team1' : 'team2';
-                playerRef.set(document.getElementById(`player${i}-${teamNumber}`).value).catch(function(error) {
-                    alert("Ошибка записи данных для игрока: " + error.message);
-                });
-            }
-            alert('Данные обновлены');
-        });
-    } )
-</script>
-    
 </body>
 </html>
